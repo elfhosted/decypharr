@@ -220,8 +220,12 @@ func getNZBContentFromFile(fileHeader *multipart.FileHeader) ([]byte, error) {
 }
 
 func (s *Server) handleGetVersion(w http.ResponseWriter, r *http.Request) {
-	v := version.GetInfo()
-	utils.JSONResponse(w, v, http.StatusOK)
+	// instance changes on every restart, which is what the settings page
+	// watches to tell that the service is back before it reloads itself.
+	utils.JSONResponse(w, struct {
+		version.Info
+		Instance string `json:"instance"`
+	}{version.GetInfo(), s.instanceID}, http.StatusOK)
 }
 
 func (s *Server) handleRunMountCacheCleanup(w http.ResponseWriter, r *http.Request) {
